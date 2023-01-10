@@ -5,7 +5,10 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { api } from "../utils/api";
 import { AiFillGithub, AiFillLinkedin, AiOutlineTwitter } from "react-icons/ai";
 import Image from "../components/Image";
-import { AiOutlineSend } from "react-icons/ai";
+import { PostMessage } from "../components/PostMessage";
+import { useState } from "react";
+import { FaDiscord } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
@@ -32,6 +35,8 @@ const Home: NextPage = () => {
       void utils.guestbook.getAll.invalidate();
     },
   });
+
+  const [messageValue, setMessageValue] = useState("");
 
   return (
     <>
@@ -79,38 +84,33 @@ const Home: NextPage = () => {
           </button>
         </div>
       </header>
-      <div className="flex items-center gap-2">
-        <input
-          placeholder="Start a new comment"
-          className="flex min-h-[theme(height.12)] w-full items-center rounded-full bg-neutral-900 px-4 py-2 text-base outline-none"
-        />
-        <button className="flex aspect-square h-8 items-center justify-center rounded-full bg-green-500">
-          <AiOutlineSend />
-        </button>
-      </div>
-      <main className="">
-        <div>
-          {session ? (
-            <>
-              <p>hi {session.user?.name}</p>
-              <button
-                onClick={() => {
-                  void signOut();
-                }}
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => {
-                void signIn("discord");
-              }}
+      <main className="flex flex-col gap-2">
+        {!session ? (
+          <div className="my-2 flex justify-center gap-2">
+            <motion.button
+              layoutId="discord"
+              className="flex items-center gap-2 rounded-md bg-purple-600 p-3"
+              onClick={() => void signIn("discord")}
             >
-              Login with Discord
-            </button>
-          )}
-        </div>
+              <FaDiscord className="text-xl" />
+              <p className="text-sm tracking-wide">Sign in with Discord</p>
+            </motion.button>
+            <motion.button
+              layoutId="twitter"
+              className="flex items-center gap-2 rounded-md bg-blue-500 p-3"
+              onClick={() => void signIn("discord")}
+            >
+              <AiOutlineTwitter className="text-xl" />
+              <p className="text-sm tracking-wide">Sign in with Twitter</p>
+            </motion.button>
+          </div>
+        ) : (
+          <button onClick={() => void signOut()}>Sign out</button>
+        )}
+        <PostMessage
+          messageValue={messageValue}
+          setMessageValue={setMessageValue}
+        />
       </main>
     </>
   );
