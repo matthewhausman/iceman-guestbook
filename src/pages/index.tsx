@@ -10,10 +10,47 @@ import { useState } from "react";
 import { FaDiscord } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
+const formatDiscordDate = (date: Date) => {
+  const returnObj = {
+    month: "",
+    day: "",
+    year: "",
+    time: "",
+  };
+  const monthNum = date.getMonth() + 1;
+  if (monthNum < 10) {
+    returnObj.month = `0${monthNum}`;
+  } else {
+    returnObj.month = `${monthNum}`;
+  }
+  const dayNum = date.getDay() + 1;
+  if (dayNum < 10) {
+    returnObj.day = `0${dayNum}`;
+  } else {
+    returnObj.day = `${dayNum}`;
+  }
+  returnObj.year = `${date.getFullYear()}`;
+  const isAm = date.getHours() < 10;
+  returnObj.time =
+    `${(date.getHours() % 12) + 1}` +
+    ":" +
+    `${date.getMinutes()}` +
+    " " +
+    (isAm ? "AM" : "PM");
+  return (
+    returnObj.month +
+    "/" +
+    returnObj.day +
+    "/" +
+    returnObj.year +
+    " " +
+    returnObj.time
+  );
+};
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
   const { data: messages, isLoading } = api.guestbook.getAll.useQuery();
-  console.log(messages)
+  console.log(messages);
   const [messageValue, setMessageValue] = useState("");
 
   return (
@@ -101,21 +138,52 @@ const Home: NextPage = () => {
                 messageValue={messageValue}
                 setMessageValue={setMessageValue}
               />
-              <AnimatePresence>
-                {session && (
-                  <motion.button
-                    className="my-2 ml-auto w-fit rounded-md bg-purple-600 p-3"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.05 }}
-                    onClick={() => void signOut()}
+              {session && (
+                <button
+                  className="my-2 ml-auto w-fit rounded-md bg-purple-600 p-3"
+                  onClick={() => void signOut()}
+                >
+                  {" "}
+                  <p className="text-sm tracking-wide">Sign Out</p>
+                </button>
+              )}
+            </div>
+            <p className="text-lg">Messages</p>
+            <div className="flex flex-col gap-1">
+              {messages?.map((msg) => {
+                return (
+                  <motion.div
+                    layout
+                    className="flex gap-4 rounded-sm bg-zinc-800 p-2 hover:bg-zinc-900"
+                    key={msg.id}
+                    layoutId={msg.id}
                   >
-                    {" "}
-                    <p className="text-sm tracking-wide">Sign Out</p>
-                  </motion.button>
-                )}
-              </AnimatePresence>
+                    <div className="relative aspect-square h-12 overflow-hidden rounded-full">
+                      <Image
+                        src={msg.image}
+                        alt={`${msg.name} message`}
+                        fill={true}
+                        priority={false}
+                        style={{ objectFit: "cover" }}
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="flex items-end gap-3">
+                        <p className="text-sm font-medium tracking-wide">
+                          {msg.name}
+                        </p>
+                        <p className="relative -top-[2px] text-xs tracking-wide text-neutral-400">
+                          {formatDiscordDate(msg.createdAt)}
+                        </p>
+                      </div>
+                      <p className="mt-1 text-base text-neutral-300">
+                        {msg.message}
+                      </p>
+                    </div>
+                    <FaDiscord className="ml-auto mr-2 self-center text-4xl" />
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.main>
         )}

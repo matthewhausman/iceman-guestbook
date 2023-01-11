@@ -20,7 +20,7 @@ export const usersRouter = createTRPCRouter({
             email: true,
             name: true,
             sessions: true,
-            image: true
+            image: true,
           },
         });
       } catch (error) {}

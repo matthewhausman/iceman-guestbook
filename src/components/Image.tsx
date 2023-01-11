@@ -11,7 +11,6 @@ type ImageWithoutFill = {
   priority?: boolean;
   className?: string;
   style?: CSSProperties;
-  // placeholder: string
 };
 
 type ImageWithFill = Omit<ImageWithoutFill, "width" | "height" | "fill"> & {
