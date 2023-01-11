@@ -8,6 +8,7 @@ export const guestbookRouter = createTRPCRouter({
         select: {
           name: true,
           message: true,
+          provider: true
         },
         orderBy: {
           createdAt: "desc",

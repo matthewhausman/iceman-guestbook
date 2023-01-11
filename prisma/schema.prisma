@@ -64,5 +64,6 @@ model Guestbook {
     createdAt DateTime @default(now())
     name      String
     message   String   @db.VarChar(100)
-    provider String  @db.VarChar(100)
+    provider  String   @db.VarChar(100)
+    image     String   @db.VarChar(100)
 }

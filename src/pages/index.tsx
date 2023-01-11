@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
   const { data: messages, isLoading } = api.guestbook.getAll.useQuery();
-
+  console.log(messages)
   const [messageValue, setMessageValue] = useState("");
 
   return (

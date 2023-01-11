@@ -50,7 +50,7 @@ export const PostMessage = ({
     currentProvider = userData.accounts[0]?.provider || "";
   }
 
-  console.log(currentProvider);
+  console.log(userData)
 
   return (
     <div className="flex h-12 flex-1 items-center gap-2 rounded-full bg-neutral-900 pl-6 pr-3">
