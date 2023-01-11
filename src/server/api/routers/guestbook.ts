@@ -23,7 +23,7 @@ export const guestbookRouter = createTRPCRouter({
             createdAt: "desc",
           },
           take: 14,
-          skip: ((input.page) - 1) * 14
+          skip: (input.page - 1) * 14,
         });
       } catch (error) {
         console.log(error);

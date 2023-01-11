@@ -52,17 +52,20 @@ const formatDiscordDate = (date: Date) => {
 };
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
-  const [page, setPage] = useState<number>(1)
-  const { data: messages } = api.guestbook.getAll.useQuery({
-    page
-  }, {
-    onSuccess: (res) => {
-      setMessageList((v) => [...(v || []), ...(res || [])])
+  const [page, setPage] = useState<number>(1);
+  const { data: messages } = api.guestbook.getAll.useQuery(
+    {
+      page,
+    },
+    {
+      onSuccess: (res) => {
+        setMessageList((v) => [...(v || []), ...(res || [])]);
+      },
     }
-  });
+  );
   const { data: messageCount } = api.guestbook.getCount.useQuery();
   const [messageValue, setMessageValue] = useState("");
-  const [messageList, setMessageList] = useState<typeof messages>([])
+  const [messageList, setMessageList] = useState<typeof messages>([]);
   const ref = useRef(null);
   const main = useRef(null);
   const isInView = useInView(ref);
@@ -73,9 +76,8 @@ const Home: NextPage = () => {
       return;
     }
     if (isInView) {
-      setPage((p) => p + 1)
+      setPage((p) => p + 1);
     }
-    console.log(isInView);
   }, [isInView, setPage]);
   return (
     <>
