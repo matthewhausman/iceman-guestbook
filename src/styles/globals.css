@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 body {
-  @apply container mx-auto bg-black text-neutral-100 px-4 sm:px-0;
+  @apply container mx-auto bg-black px-4 text-neutral-100 sm:px-0;
 }

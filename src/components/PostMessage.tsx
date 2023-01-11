@@ -1,10 +1,10 @@
 import { AiOutlineSend } from "react-icons/ai";
 import { api } from "../utils/api";
 import { useSession } from "next-auth/react";
-import Filter from 'bad-words'
-import { BarLoader } from 'react-spinners'
+import Filter from "bad-words";
+import { BarLoader } from "react-spinners";
 
-const filter = new Filter()
+const filter = new Filter();
 export const PostMessage = ({
   messageValue,
   setMessageValue,
@@ -23,19 +23,20 @@ export const PostMessage = ({
     }
   );
 
-  const { mutate, isLoading: postingMessage } = api.guestbook.postMessage.useMutation({
-    onMutate: () => {
-      setMessageValue("");
-    },
-    // onError: (err, newTodo, context) => {
-    //   if (context) {
-    //     utils.guestbook.getAll.setData(undefined, () => context.prevData);
-    //   }
-    // },
-    onSuccess: () => {
-      void utils.guestbook.invalidate()
-    },
-  });
+  const { mutate, isLoading: postingMessage } =
+    api.guestbook.postMessage.useMutation({
+      onMutate: () => {
+        setMessageValue("");
+      },
+      // onError: (err, newTodo, context) => {
+      //   if (context) {
+      //     utils.guestbook.getAll.setData(undefined, () => context.prevData);
+      //   }
+      // },
+      onSuccess: () => {
+        void utils.guestbook.invalidate();
+      },
+    });
 
   const usersName = session?.user?.name || "";
   const usersImage = session?.user?.image || "";
@@ -46,7 +47,7 @@ export const PostMessage = ({
 
   return (
     <div className="flex flex-1 flex-col gap-1">
-      <div className="flex h-12 items-center gap-2 rounded-full bg-neutral-900 pl-6 pr-3 relative overflow-hidden">
+      <div className="relative flex h-12 items-center gap-2 overflow-hidden rounded-full bg-neutral-900 pl-6 pr-3">
         <input
           disabled={!session || postingMessage}
           value={messageValue}
@@ -60,7 +61,7 @@ export const PostMessage = ({
             console.log(event.key);
             if (event.key !== "Enter" || event.metaKey || event.shiftKey)
               return;
-            if (messageValue.length > 100) return
+            if (messageValue.length > 100) return;
             mutate({
               name: usersName,
               message: filter.clean(messageValue),
@@ -70,8 +71,13 @@ export const PostMessage = ({
           }}
         />
         <button
-          disabled={!messageValue.trim() || !session || messageValue.length > 100 || postingMessage}
-          className="flex aspect-square h-8 items-center text-blue-400 justify-center rounded-full bg-green-500 transition-colors disabled:bg-neutral-700 disabled:text-neutral-400"
+          disabled={
+            !messageValue.trim() ||
+            !session ||
+            messageValue.length > 100 ||
+            postingMessage
+          }
+          className="flex aspect-square h-8 items-center justify-center rounded-full bg-green-500 text-blue-400 transition-colors disabled:bg-neutral-700 disabled:text-neutral-400"
           onClick={() =>
             mutate({
               name: usersName,
@@ -83,12 +89,25 @@ export const PostMessage = ({
         >
           <AiOutlineSend />
         </button>
-        {postingMessage && <div className="absolute bottom-[1px] inset-x-0">
-          <BarLoader width={'100%'} color={'rgb(96 165 250)'} height={'2px'} speedMultiplier={.8} />
-        </div>}
+        {postingMessage && (
+          <div className="absolute inset-x-0 bottom-[1px]">
+            <BarLoader
+              width={"100%"}
+              color={"rgb(96 165 250)"}
+              height={"2px"}
+              speedMultiplier={0.8}
+            />
+          </div>
+        )}
       </div>
-      <div className="flex justify-start ml-6">
-        <p className={`${messageValue.length > 100 ? 'text-red-400' : 'text-neutral-400'} text-sm transition-colors`}>{messageValue.length} / 100 characters used</p>
+      <div className="ml-6 flex justify-start">
+        <p
+          className={`${
+            messageValue.length > 100 ? "text-red-400" : "text-neutral-400"
+          } text-sm transition-colors`}
+        >
+          {messageValue.length} / 100 characters used
+        </p>
       </div>
     </div>
   );

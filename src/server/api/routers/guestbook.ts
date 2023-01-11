@@ -2,34 +2,38 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const guestbookRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    try {
-      return await ctx.prisma.guestbook.findMany({
-        select: {
-          name: true,
-          message: true,
-          provider: true,
-          image: true,
-          createdAt: true,
-          id: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 14,
-        cursor: {
-          id: undefined
-        }
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }),
+  getAll: publicProcedure
+    .input(
+      z.object({
+        page: z.number(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        return await ctx.prisma.guestbook.findMany({
+          select: {
+            name: true,
+            message: true,
+            provider: true,
+            image: true,
+            createdAt: true,
+            id: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 14,
+          skip: ((input.page) - 1) * 14
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }),
   getCount: publicProcedure.query(async ({ ctx }) => {
     try {
-      return await ctx.prisma.guestbook.count()
+      return await ctx.prisma.guestbook.count();
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   }),
   postMessage: protectedProcedure
