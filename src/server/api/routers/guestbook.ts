@@ -16,6 +16,10 @@ export const guestbookRouter = createTRPCRouter({
         orderBy: {
           createdAt: "desc",
         },
+        take: 14,
+        cursor: {
+          id: undefined
+        }
       });
     } catch (error) {
       console.log(error);

@@ -5,9 +5,9 @@ import { api } from "../utils/api";
 import { AiFillGithub, AiFillLinkedin, AiOutlineTwitter } from "react-icons/ai";
 import Image from "../components/Image";
 import { PostMessage } from "../components/PostMessage";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FaDiscord } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 
 const formatDiscordDate = (date: Date) => {
   const returnObj = {
@@ -31,9 +31,9 @@ const formatDiscordDate = (date: Date) => {
   returnObj.year = `${date.getFullYear()}`;
   const isAm = date.getHours() < 12 || date.getHours() === 24;
   returnObj.time =
-    `${date.getHours() % 12}` +
+    (date.getHours() % 12) < 10 ? `0${date.getHours() % 12}` : `${date.getHours() % 12}` +
     ":" +
-    `${date.getMinutes()}` +
+    (date.getMinutes() < 10 ? `0${date.getMinutes()}` : `${date.getMinutes()}`) +
     " " +
     (isAm ? "AM" : "PM");
   return (
@@ -48,11 +48,12 @@ const formatDiscordDate = (date: Date) => {
 };
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
-  const { data: messages, isLoading } = api.guestbook.getAll.useQuery();
+  const { data: messages } = api.guestbook.getAll.useQuery();
   const { data: messageCount } = api.guestbook.getCount.useQuery()
-  console.log(messages);
   const [messageValue, setMessageValue] = useState("");
-
+  const ref = useRef(null)
+  const isInView = useInView(ref)
+  console.log(isInView)
   return (
     <>
       <Head>
@@ -105,7 +106,7 @@ const Home: NextPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex flex-col gap-4 mt-6"
+            className="flex flex-col gap-4 mt-6 mb-6"
           >
             {!session && (
               <div className="my-2 flex justify-center gap-2">
@@ -158,12 +159,15 @@ const Home: NextPage = () => {
               {messages?.map((msg) => {
                 return (
                   <motion.div
-                    layout
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    transition={{delay: .2}}
                     className="flex gap-4 rounded-sm bg-zinc-800 p-2 hover:bg-zinc-900"
                     key={msg.id}
                     layoutId={msg.id}
+                    layout
                   >
-                    <div className="relative aspect-square h-12 overflow-hidden rounded-full">
+                    <div className="relative aspect-square h-10 overflow-hidden rounded-full">
                       <Image
                         src={msg.image}
                         alt={`${msg.name} message`}
@@ -172,7 +176,7 @@ const Home: NextPage = () => {
                         style={{ objectFit: "cover" }}
                       />
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col flex-1 overflow-hidden break-words">
                       <div className="flex items-end gap-3">
                         <p className="text-sm font-medium tracking-wide">
                           {msg.name}
@@ -181,7 +185,7 @@ const Home: NextPage = () => {
                           {formatDiscordDate(msg.createdAt)}
                         </p>
                       </div>
-                      <p className="mt-1 text-base text-neutral-300">
+                      <p className="mt-1 text-base text-neutral-300 white">
                         {msg.message}
                       </p>
                     </div>
@@ -189,6 +193,7 @@ const Home: NextPage = () => {
                   </motion.div>
                 );
               })}
+              {messages && <div ref={ref} className="w-full h-[1px]"></div>}
             </div>
           </motion.main>
         )}
