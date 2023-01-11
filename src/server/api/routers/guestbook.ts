@@ -21,6 +21,13 @@ export const guestbookRouter = createTRPCRouter({
       console.log(error);
     }
   }),
+  getCount: publicProcedure.query(async ({ ctx }) => {
+    try {
+      return await ctx.prisma.guestbook.count()
+    } catch (err) {
+      console.log(err)
+    }
+  }),
   postMessage: protectedProcedure
     .input(
       z.object({

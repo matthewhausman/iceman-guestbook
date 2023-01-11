@@ -1,6 +1,5 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { api } from "../utils/api";
 import { AiFillGithub, AiFillLinkedin, AiOutlineTwitter } from "react-icons/ai";
@@ -30,9 +29,9 @@ const formatDiscordDate = (date: Date) => {
     returnObj.day = `${dayNum}`;
   }
   returnObj.year = `${date.getFullYear()}`;
-  const isAm = date.getHours() < 10;
+  const isAm = date.getHours() < 12 || date.getHours() === 24;
   returnObj.time =
-    `${(date.getHours() % 12) + 1}` +
+    `${date.getHours() % 12}` +
     ":" +
     `${date.getMinutes()}` +
     " " +
@@ -50,6 +49,7 @@ const formatDiscordDate = (date: Date) => {
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
   const { data: messages, isLoading } = api.guestbook.getAll.useQuery();
+  const { data: messageCount } = api.guestbook.getCount.useQuery()
   console.log(messages);
   const [messageValue, setMessageValue] = useState("");
 
@@ -105,7 +105,7 @@ const Home: NextPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex flex-col gap-2"
+            className="flex flex-col gap-4 mt-6"
           >
             {!session && (
               <div className="my-2 flex justify-center gap-2">
@@ -133,14 +133,14 @@ const Home: NextPage = () => {
                 </>
               </div>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-start gap-2">
               <PostMessage
                 messageValue={messageValue}
                 setMessageValue={setMessageValue}
               />
               {session && (
                 <button
-                  className="my-2 ml-auto w-fit rounded-md bg-purple-600 p-3"
+                  className="mt-[1px] ml-auto w-fit rounded-md bg-purple-600 p-3"
                   onClick={() => void signOut()}
                 >
                   {" "}
@@ -148,7 +148,12 @@ const Home: NextPage = () => {
                 </button>
               )}
             </div>
-            <p className="text-lg">Messages</p>
+            <div className="flex gap-3">
+              <p className="text-lg">Messages</p>
+              <div className="px-2 bg-neutral-800 flex items-center justify-center rounded-md">
+                <span className="text-base text-neutral-300">{messageCount}</span>
+              </div>
+            </div>
             <div className="flex flex-col gap-1">
               {messages?.map((msg) => {
                 return (
