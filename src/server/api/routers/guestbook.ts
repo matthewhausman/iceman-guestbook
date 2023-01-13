@@ -47,7 +47,7 @@ export const guestbookRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        await ctx.prisma.guestbook.create({
+        const res = await ctx.prisma.guestbook.create({
           data: {
             name: input.name,
             message: input.message,
@@ -55,6 +55,7 @@ export const guestbookRouter = createTRPCRouter({
             image: input.image,
           },
         });
+        return res;
       } catch (error) {
         console.log(error);
       }

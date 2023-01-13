@@ -1,16 +1,23 @@
 import { AiOutlineSend } from "react-icons/ai";
+import type { RouterOutputs } from "../utils/api";
 import { api } from "../utils/api";
 import { useSession } from "next-auth/react";
 import Filter from "bad-words";
 import { BarLoader } from "react-spinners";
+import type { Dispatch, SetStateAction } from "react";
 
 const filter = new Filter();
+type GetAllOutputs = RouterOutputs["guestbook"]["getAll"];
 export const PostMessage = ({
   messageValue,
   setMessageValue,
+  setMessageList,
+  setPage,
 }: {
   messageValue: string;
   setMessageValue: (v: string) => void;
+  setMessageList: Dispatch<SetStateAction<GetAllOutputs>>;
+  setPage: Dispatch<SetStateAction<number>>;
 }) => {
   const utils = api.useContext();
   const { data: session } = useSession();
@@ -28,13 +35,12 @@ export const PostMessage = ({
       onMutate: () => {
         setMessageValue("");
       },
-      // onError: (err, newTodo, context) => {
-      //   if (context) {
-      //     utils.guestbook.getAll.setData(undefined, () => context.prevData);
-      //   }
-      // },
-      onSuccess: () => {
-        void utils.guestbook.invalidate();
+      onSuccess: (res) => {
+        if (res) {
+          setMessageList([]);
+          setPage(0);
+          void utils.guestbook.invalidate();
+        }
       },
     });
 
@@ -58,7 +64,6 @@ export const PostMessage = ({
           onChange={(v) => setMessageValue(v.target.value)}
           onKeyDown={(event) => {
             if (!session) return;
-            console.log(event.key);
             if (event.key !== "Enter" || event.metaKey || event.shiftKey)
               return;
             if (messageValue.length > 100) return;
@@ -77,7 +82,7 @@ export const PostMessage = ({
             messageValue.length > 100 ||
             postingMessage
           }
-          className="flex aspect-square h-8 items-center justify-center rounded-full bg-green-500 text-blue-400 transition-colors disabled:bg-neutral-700 disabled:text-neutral-400"
+          className="flex aspect-square h-8 items-center justify-center rounded-full text-white bg-green-500 transition-colors disabled:bg-neutral-700 disabled:text-neutral-400"
           onClick={() =>
             mutate({
               name: usersName,

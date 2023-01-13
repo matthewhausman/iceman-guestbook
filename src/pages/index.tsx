@@ -1,12 +1,13 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
+import type { RouterOutputs } from "../utils/api";
 import { api } from "../utils/api";
 import { AiFillGithub, AiFillLinkedin, AiOutlineTwitter } from "react-icons/ai";
 import Image from "../components/Image";
 import { PostMessage } from "../components/PostMessage";
 import { useEffect, useRef, useState } from "react";
-import { FaDiscord } from "react-icons/fa";
+import { FaDiscord, FaGoogle } from "react-icons/fa";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 
 const formatDiscordDate = (date: Date) => {
@@ -29,17 +30,16 @@ const formatDiscordDate = (date: Date) => {
     returnObj.day = `${dayNum}`;
   }
   returnObj.year = `${date.getFullYear()}`;
-  const isAm = date.getHours() < 12 || date.getHours() === 24;
+  const isAm = date.getHours() < 12;
+  const hours = date.getHours() === 0 ? 24 : date.getHours();
   returnObj.time =
-    date.getHours() % 12 < 10
-      ? `0${date.getHours() % 12}`
-      : `${date.getHours() % 12}` +
-        ":" +
-        (date.getMinutes() < 10
-          ? `0${date.getMinutes()}`
-          : `${date.getMinutes()}`) +
-        " " +
-        (isAm ? "AM" : "PM");
+    (hours % 13 < 10 ? `0${(hours % 13) + 1}` : `${(hours % 13) + 1}`) +
+    ":" +
+    (date.getMinutes() < 10
+      ? `0${date.getMinutes()}`
+      : `${date.getMinutes()}`) +
+    " " +
+    (isAm ? "AM" : "PM");
   return (
     returnObj.month +
     "/" +
@@ -50,10 +50,13 @@ const formatDiscordDate = (date: Date) => {
     returnObj.time
   );
 };
+type GetAllOutputs = RouterOutputs["guestbook"]["getAll"];
+
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
   const [page, setPage] = useState<number>(1);
-  const { data: messages } = api.guestbook.getAll.useQuery(
+  const [messageList, setMessageList] = useState<GetAllOutputs>([]);
+  api.guestbook.getAll.useQuery(
     {
       page,
     },
@@ -61,11 +64,13 @@ const Home: NextPage = () => {
       onSuccess: (res) => {
         setMessageList((v) => [...(v || []), ...(res || [])]);
       },
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
     }
   );
   const { data: messageCount } = api.guestbook.getCount.useQuery();
   const [messageValue, setMessageValue] = useState("");
-  const [messageList, setMessageList] = useState<typeof messages>([]);
   const ref = useRef(null);
   const main = useRef(null);
   const isInView = useInView(ref);
@@ -157,6 +162,16 @@ const Home: NextPage = () => {
                       Sign in with Twitter
                     </p>
                   </motion.button>
+                  <motion.button
+                    layoutId="google"
+                    className="flex items-center gap-2 rounded-md border-neutral-400 bg-white p-3 transition-colors disabled:bg-neutral-700 disabled:text-neutral-500"
+                    onClick={() => void signIn("google")}
+                  >
+                    <FaGoogle className="text-xl text-red-400" />
+                    <p className="text-sm tracking-wide text-neutral-800">
+                      Sign in with Google
+                    </p>
+                  </motion.button>
                 </>
               </div>
             )}
@@ -164,6 +179,8 @@ const Home: NextPage = () => {
               <PostMessage
                 messageValue={messageValue}
                 setMessageValue={setMessageValue}
+                setMessageList={setMessageList}
+                setPage={setPage}
               />
               {session && (
                 <button
@@ -217,7 +234,11 @@ const Home: NextPage = () => {
                         {msg.message}
                       </p>
                     </div>
-                    <FaDiscord className="ml-auto mr-2 self-center text-4xl" />
+                    {msg.provider === "discord" ? (
+                      <FaDiscord className="ml-auto mr-2 self-center text-4xl" />
+                    ) : (
+                      <FaGoogle className="ml-auto mr-2 self-center text-4xl" />
+                    )}
                   </motion.div>
                 );
               })}
